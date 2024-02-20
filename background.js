@@ -21,13 +21,3 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     chrome.runtime.sendMessage({ cssProperties: message.cssProperties });
   }
 });
-
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-  if (message.action === "updateCSS") {
-    var clickedElement = document.querySelector(".clicked-element");
-    if (clickedElement) {
-      var cssText = message.cssText;
-      applyCSSChanges(clickedElement, cssText);
-    }
-  }
-});

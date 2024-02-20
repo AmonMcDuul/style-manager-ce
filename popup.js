@@ -1,3 +1,7 @@
+function applyCSSChanges(clickedElement, cssText) {
+  clickedElement.style.cssText = cssText;
+}
+
 function displayCSS(cssProperties) {
   var cssText = "";
   for (var prop in cssProperties) {
@@ -17,5 +21,9 @@ document
   .getElementById("element-selector")
   .addEventListener("input", function (event) {
     var cssText = event.target.value;
-    chrome.runtime.sendMessage({ action: "updateCSS", cssText: cssText });
+    var clickedElement = document.querySelector(".clicked-element");
+    if (clickedElement) {
+      console.log("inpuut");
+      applyCSSChanges(clickedElement, cssText);
+    }
   });
