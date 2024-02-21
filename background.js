@@ -1,30 +1,36 @@
 chrome.contextMenus.create({
-  id: "showCSS",
-  title: "Show CSS",
+  id: "showBorders",
+  title: "Show borders",
   contexts: ["all"],
 });
 
 chrome.contextMenus.create({
-  id: "seeBorders",
-  title: "Show Borders",
+  id: "toggleBorderOnHover",
+  title: "Toggle border on hover",
+  contexts: ["all"],
+});
+
+chrome.contextMenus.create({
+  id: "toggleCssOnHover",
+  title: "Toggle css on hover",
   contexts: ["all"],
 });
 
 chrome.contextMenus.onClicked.addListener(function (info, tab) {
-  if (info.menuItemId === "seeBorders") {
+  if (info.menuItemId === "showBorders") {
     chrome.tabs.sendMessage(tab.id, { action: "showBorders" });
   }
 });
 
 chrome.contextMenus.onClicked.addListener(function (info, tab) {
-  if (info.menuItemId === "showCSS") {
-    chrome.tabs.sendMessage(tab.id, { action: "getCSS" });
-    chrome.windows.create({
-      url: "popup.html",
-      type: "popup",
-      width: 400,
-      height: 300,
-    });
+  if (info.menuItemId === "toggleBorderOnHover") {
+    chrome.tabs.sendMessage(tab.id, { action: "toggleBorderOnHover" });
+  }
+});
+
+chrome.contextMenus.onClicked.addListener(function (info, tab) {
+  if (info.menuItemId === "toggleCssOnHover") {
+    chrome.tabs.sendMessage(tab.id, { action: "toggleCssOnHover" });
   }
 });
 

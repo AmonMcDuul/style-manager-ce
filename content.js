@@ -1,4 +1,5 @@
 var showCssOnHover = false;
+var showBorderOnHover = false;
 
 let previousClickedElement = null;
 
@@ -51,11 +52,30 @@ function getCSSProperties(clickedElement) {
 }
 
 document.addEventListener("click", function (event) {
-  showCssOnHover = true;
-  displayHoveredElementCSS(event);
   var clickedElement = event.target;
   addBorder(clickedElement);
   getCSSProperties(clickedElement);
+});
+
+document.addEventListener("keydown", function (event) {
+  if (event.ctrlKey && event.altKey && event.key === "h") {
+    toggleBorderOnHover();
+  }
+});
+
+document.addEventListener("keydown", function (event) {
+  if (event.ctrlKey && event.altKey && event.key === "f") {
+    toggleCssOnHover();
+  }
+});
+
+document.addEventListener("keydown", function (event) {
+  if (event.ctrlKey && event.altKey && event.key === "g") {
+    var allElements = document.body.querySelectorAll("*");
+    allElements.forEach(function (element) {
+      addPersistantBorder(element);
+    });
+  }
 });
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
@@ -67,12 +87,23 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 });
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-  showCssOnHover = true;
   if (message.action === "showBorders") {
     var allElements = document.body.querySelectorAll("*");
     allElements.forEach(function (element) {
       addPersistantBorder(element);
     });
+  }
+});
+
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+  if (message.action === "toggleBorderOnHover") {
+    toggleBorderOnHover();
+  }
+});
+
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+  if (message.action === "toggleCssOnHover") {
+    toggleCssOnHover();
   }
 });
 
@@ -106,16 +137,36 @@ function removeCSSPopup() {
   }
 }
 
+function addBorderOnHover(event) {
+  addBorder(event.target);
+}
+
 function displayHoveredElementCSS(event) {
+  var hoveredElement = event.target;
+  var cssProperties = getCSSProperties(hoveredElement);
+  var x = event.clientX;
+  var y = event.clientY;
+  removeCSSPopup();
+  displayCSSPopup(cssProperties, x, y);
+}
+
+function toggleCssOnHover() {
+  removeCSSPopup();
+  showCssOnHover = !showCssOnHover;
   if (showCssOnHover) {
-    var hoveredElement = event.target;
-    var cssProperties = getCSSProperties(hoveredElement);
-    var x = event.clientX;
-    var y = event.clientY;
-    removeCSSPopup();
-    displayCSSPopup(cssProperties, x, y);
+    document.addEventListener("mouseover", displayHoveredElementCSS);
+    document.addEventListener("mouseout", removeCSSPopup);
+  } else {
+    document.removeEventListener("mouseover", displayHoveredElementCSS);
+    document.removeEventListener("mouseout", removeCSSPopup);
   }
 }
 
-document.addEventListener("mouseover", displayHoveredElementCSS);
-document.addEventListener("mouseout", removeCSSPopup);
+function toggleBorderOnHover() {
+  showBorderOnHover = !showBorderOnHover;
+  if (showBorderOnHover) {
+    document.addEventListener("mouseover", addBorderOnHover);
+  } else {
+    document.removeEventListener("mouseover", addBorderOnHover);
+  }
+}
