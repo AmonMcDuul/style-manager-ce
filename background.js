@@ -34,8 +34,8 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
   }
 });
 
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-  if (message.cssProperties) {
-    chrome.runtime.sendMessage({ cssProperties: message.cssProperties });
-  }
-});
+// chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+//   if (message.cssProperties) {
+//     chrome.runtime.sendMessage({ cssProperties: message.cssProperties });
+//   }
+// });
