@@ -1,55 +1,6 @@
 var showCssOnHover = false;
 var showBorderOnHover = false;
-
 let previousClickedElement = null;
-
-function addBorder(element) {
-  if (previousClickedElement) {
-    previousClickedElement.style.outline = "none";
-    previousClickedElement.classList.remove("clicked-element");
-  }
-
-  removePersistantBorders();
-
-  element.style.outline = "2px solid red";
-  element.classList.add("clicked-element");
-
-  previousClickedElement = element;
-}
-
-function addPersistantBorder(element) {
-  element.style.outline = "1px solid red";
-  element.classList.add("persistant-border-element");
-}
-
-function removePersistantBorders() {
-  var elements = document.querySelectorAll(".persistant-border-element");
-  elements.forEach(function (element) {
-    element.style.outline = "none";
-  });
-}
-
-function getCSSProperties(clickedElement) {
-  var cssProperties = {};
-
-  for (var i = 0; i < document.styleSheets.length; i++) {
-    var styleSheet = document.styleSheets[i];
-    var cssRules = styleSheet.cssRules || styleSheet.rules;
-    if (!cssRules) continue;
-    for (var j = 0; j < cssRules.length; j++) {
-      var cssRule = cssRules[j];
-      if (clickedElement.matches(cssRule.selectorText)) {
-        for (var k = 0; k < cssRule.style.length; k++) {
-          var propertyName = cssRule.style[k];
-          var propertyValue = cssRule.style.getPropertyValue(propertyName);
-          cssProperties[propertyName] = propertyValue;
-        }
-      }
-    }
-  }
-
-  return cssProperties;
-}
 
 document.addEventListener("click", function (event) {
   var clickedElement = event.target;
@@ -71,10 +22,7 @@ document.addEventListener("keydown", function (event) {
 
 document.addEventListener("keydown", function (event) {
   if (event.ctrlKey && event.altKey && event.key === "g") {
-    var allElements = document.body.querySelectorAll("*");
-    allElements.forEach(function (element) {
-      addPersistantBorder(element);
-    });
+    addBorderToAllElements();
   }
 });
 
@@ -88,10 +36,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (message.action === "showBorders") {
-    var allElements = document.body.querySelectorAll("*");
-    allElements.forEach(function (element) {
-      addPersistantBorder(element);
-    });
+    addBorderToAllElements();
   }
 });
 
@@ -107,6 +52,71 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   }
 });
 
+function addBorder(element) {
+  if (previousClickedElement) {
+    previousClickedElement.style.outline = "none";
+    previousClickedElement.classList.remove("clicked-element");
+  }
+
+  removePersistantBorders();
+
+  element.style.outline = "2px solid red";
+  element.classList.add("clicked-element");
+  previousClickedElement = element;
+}
+
+function addPersistantBorder(element) {
+  element.style.outline = "1px solid red";
+  element.classList.add("persistant-border-element");
+}
+
+function removePersistantBorders() {
+  var elements = document.querySelectorAll(".persistant-border-element");
+  elements.forEach(function (element) {
+    element.style.outline = "none";
+  });
+}
+
+function addBorderToAllElements() {
+  var allElements = document.body.querySelectorAll("*");
+  allElements.forEach(function (element) {
+    addPersistantBorder(element);
+  });
+}
+
+function addBorderOnHover(event) {
+  addBorder(event.target);
+}
+
+function toggleBorderOnHover() {
+  showBorderOnHover = !showBorderOnHover;
+  if (showBorderOnHover) {
+    document.addEventListener("mouseover", addBorderOnHover);
+  } else {
+    document.removeEventListener("mouseover", addBorderOnHover);
+  }
+}
+
+function getCSSProperties(clickedElement) {
+  var cssProperties = {};
+  for (var i = 0; i < document.styleSheets.length; i++) {
+    var styleSheet = document.styleSheets[i];
+    var cssRules = styleSheet.cssRules || styleSheet.rules;
+    if (!cssRules) continue;
+    for (var j = 0; j < cssRules.length; j++) {
+      var cssRule = cssRules[j];
+      if (clickedElement.matches(cssRule.selectorText)) {
+        for (var k = 0; k < cssRule.style.length; k++) {
+          var propertyName = cssRule.style[k];
+          var propertyValue = cssRule.style.getPropertyValue(propertyName);
+          cssProperties[propertyName] = propertyValue;
+        }
+      }
+    }
+  }
+  return cssProperties;
+}
+
 function displayCSSPopup(cssProperties, x, y) {
   var popup = document.createElement("div");
   popup.id = "css-popup";
@@ -119,13 +129,11 @@ function displayCSSPopup(cssProperties, x, y) {
   popup.style.zIndex = "9999";
 
   var propertiesList = document.createElement("ul");
-
   for (var prop in cssProperties) {
     var listItem = document.createElement("li");
     listItem.textContent = `${prop}: ${cssProperties[prop]}`;
     propertiesList.appendChild(listItem);
   }
-
   popup.appendChild(propertiesList);
   document.body.appendChild(popup);
 }
@@ -135,10 +143,6 @@ function removeCSSPopup() {
   if (popup) {
     popup.remove();
   }
-}
-
-function addBorderOnHover(event) {
-  addBorder(event.target);
 }
 
 function displayHoveredElementCSS(event) {
@@ -159,14 +163,5 @@ function toggleCssOnHover() {
   } else {
     document.removeEventListener("mouseover", displayHoveredElementCSS);
     document.removeEventListener("mouseout", removeCSSPopup);
-  }
-}
-
-function toggleBorderOnHover() {
-  showBorderOnHover = !showBorderOnHover;
-  if (showBorderOnHover) {
-    document.addEventListener("mouseover", addBorderOnHover);
-  } else {
-    document.removeEventListener("mouseover", addBorderOnHover);
   }
 }
