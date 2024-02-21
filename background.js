@@ -4,6 +4,18 @@ chrome.contextMenus.create({
   contexts: ["all"],
 });
 
+chrome.contextMenus.create({
+  id: "seeBorders",
+  title: "Show Borders",
+  contexts: ["all"],
+});
+
+chrome.contextMenus.onClicked.addListener(function (info, tab) {
+  if (info.menuItemId === "seeBorders") {
+    chrome.tabs.sendMessage(tab.id, { action: "showBorders" });
+  }
+});
+
 chrome.contextMenus.onClicked.addListener(function (info, tab) {
   if (info.menuItemId === "showCSS") {
     chrome.tabs.sendMessage(tab.id, { action: "getCSS" });
